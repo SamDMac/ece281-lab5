@@ -74,15 +74,15 @@ architecture top_basys3_arch of top_basys3 is
             );
         end component clock_divider;
 -- 2SCOMP COMPONENT
---    component twoscomp_decimal is
---        port (
---            i_binary: in std_logic_vector(7 downto 0);
---            o_negative: out std_logic;
---            o_hundreds: out std_logic_vector(3 downto 0);
---            o_tens: out std_logic_vector(3 downto 0);
---            o_ones: out std_logic_vector(3 downto 0)
---        );
---    end component twoscomp_decimal;
+    component twoscomp_decimal is
+        port (
+            i_binary: in std_logic_vector(7 downto 0);
+            o_negative: out std_logic;
+            o_hundreds: out std_logic_vector(3 downto 0);
+            o_tens: out std_logic_vector(3 downto 0);
+            o_ones: out std_logic_vector(3 downto 0)
+        );
+    end component twoscomp_decimal;
 --ALU COMPONENT    
    component ALU is
    generic(N: integer := 8);
@@ -108,7 +108,7 @@ architecture top_basys3_arch of top_basys3 is
 signal w_A : std_logic_vector(7 downto 0);
 signal w_B : std_logic_vector(7 downto 0);
 signal w_cycle : std_logic_vector(3 downto 0);
-signal w_display : std_logic_vector(7 downto 0);
+signal w_display : std_logic_vector(3 downto 0);
         --clock
 signal w_clk : std_logic;
         --decimal #
@@ -143,10 +143,10 @@ ALU_inst : ALU
 TDM4_inst : TDM4
         port map ( i_clk => w_clk,
                  i_reset => btnU,  
-                 i_D3 => w_display(7 downto 4),
-                 i_D2 => w_display(3 downto 0),    
-                 i_D1 => w_display(3 downto 0),        
-                 i_D0 => w_display(7 downto 4),
+                 i_D3 => w_display,
+                 i_D2 => w_hundreds,    
+                 i_D1 => w_tens,        
+                 i_D0 => w_ones,
                  o_data => w_data,
                  o_sel => w_sel
                  );
@@ -170,21 +170,30 @@ controller_fsm_inst : controller_fsm
               o_S => w_cycle,
               o_A => w_A,
               o_B => w_B           
-                            ); 
+                            );
+twoscomp_decimal_inst : twoscomp_decimal
+        port map (
+              i_binary => w_bin,
+              o_negative => w_negative,
+              o_hundreds => w_hundreds,
+              o_tens => w_tens,
+              o_ones => w_ones
+                 ); 
 	-- CONCURRENT STATEMENTS ----------------------------
 
 --INPUT REGISTERS
 
 --what to display
- w_display <= w_A when w_cycle="0001" else
+ w_display <= x"F" when w_negative='1' else x"0";
+ w_bin <= w_A when w_cycle="0001" else
               w_B when w_cycle="0010" else
               w_ALU when w_cycle="0100";	
 --anodes	
 	w_7SD_EN_n <= '1';
-        an(3) <= w_7SD_EN_n;
-        an(2) <= w_7SD_EN_n;
-        an(1) <= '1' when w_cycle="1000" or w_sel="1011" or w_sel="1101" else '0';
-        an(0) <= '1' when w_cycle="1000" or w_sel="0111" or w_sel="1110" else '0';
+        an(3) <= '1' when w_cycle="1000" or w_sel="1110" or w_sel="1101" or w_sel="1011" or w_negative='0' else '0';
+        an(2) <= '1' when w_cycle="1000" or w_sel="0111" or w_sel="1101" or w_sel="1110" else '0';
+        an(1) <= '1' when w_cycle="1000" or w_sel="0111" or w_sel="1011" or w_sel="1110" else '0';
+        an(0) <= '1' when w_cycle="1000" or w_sel="0111" or w_sel="1011" or w_sel="1101" else '0';
 --LEDs
     led(3 downto 0) <= w_cycle;
 	led(12 downto 4) <= "000000000";
