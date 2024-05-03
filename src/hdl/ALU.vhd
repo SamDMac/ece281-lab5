@@ -68,17 +68,17 @@ begin
     w_add(N-1 downto 0) <= std_logic_vector(unsigned(i_A) + unsigned(w_B) + unsigned(cin));
     
 -- SHIFTER CODE
-    --w_shift <= std_logic_vector(shift_left(unsigned(i_A),to_integer(unsigned(i_B(2 downto 0))))) when op(0) = '0'
-               --else std_logic_vector(shift_right(unsigned(i_A),to_integer(unsigned(i_B(2 downto 0)))));
+    w_shift <= std_logic_vector(shift_left(unsigned(i_A),to_integer(unsigned(i_B(2 downto 0))))) when op(0) = '0'
+               else std_logic_vector(shift_right(unsigned(i_A),to_integer(unsigned(i_B(2 downto 0)))));
 -- AND/OR CODE	
-    --w_and <= i_A and i_B;
-    --w_or <= i_A or i_B;
+    w_and <= i_A and i_B;
+    w_or <= i_A or i_B;
 -- OUTPUT CODE
 	
-	w_ALUout <= w_add(N-1 downto 0); --when op(2 downto 1)=x"0" else
-	         --w_shift when op(2 downto 1)="01" else
-	         --w_or when op(2 downto 1)=x"11" else
-	         --w_and when op(2 downto 1)=x"10";
+	w_ALUout <= w_add(N-1 downto 0) when op(2 downto 1)="00" else
+	            w_shift when op(2 downto 1)="01" else
+	            w_or when op(2 downto 1)="11" else
+	            w_and when op(2 downto 1)="10";
    
     o_ALU <= w_ALUout;
     o_flag(0) <= w_add(N);

@@ -187,8 +187,8 @@ twoscomp_decimal_inst : twoscomp_decimal
  w_display <= x"F" when w_negative='1' else x"0";
  w_bin <= w_A when w_cycle="0001" else
               w_B when w_cycle="0010" else
-              w_ALU when w_cycle="0100";	
---anodes	
+              w_ALU when w_cycle="0100" else "00000000";	
+--anodes
 	w_7SD_EN_n <= '1';
         an(3) <= '1' when w_cycle="1000" or w_sel="1110" or w_sel="1101" or w_sel="1011" or w_negative='0' else '0';
         an(2) <= '1' when w_cycle="1000" or w_sel="0111" or w_sel="1101" or w_sel="1110" else '0';
